@@ -145,7 +145,178 @@ const CONNECTORS = {
     platforms: "analytics.google.com (GA4)",
     docsUrl: "https://docs.databricks.com/aws/en/ingestion/lakeflow-connect/google-analytics",
   },
+  workday_hcm: {
+    label: "Workday HCM",
+    icon: "briefcase",
+    status: "Public Preview",
+    defaultPorts: ["443"],
+    authMethods: ["OAuth 2.0"],
+    supportsPrivateLink: false,
+    category: "SaaS",
+    platforms: "workday.com tenants (HCM module)",
+    docsUrl: "https://docs.databricks.com/aws/en/ingestion/lakeflow-connect/workday-hcm-overview",
+  },
+  hubspot: {
+    label: "HubSpot",
+    icon: "briefcase",
+    status: "Beta",
+    defaultPorts: ["443"],
+    authMethods: ["OAuth U2M"],
+    supportsPrivateLink: false,
+    category: "SaaS",
+    platforms: "hubspot.com",
+    docsUrl: "https://docs.databricks.com/aws/en/ingestion/lakeflow-connect/hubspot-overview",
+  },
+  jira: {
+    label: "Jira",
+    icon: "wrench",
+    status: "Beta",
+    defaultPorts: ["443"],
+    authMethods: ["OAuth 2.0"],
+    supportsPrivateLink: false,
+    category: "SaaS",
+    platforms: "Atlassian Jira (Cloud + on-prem)",
+    docsUrl: "https://docs.databricks.com/aws/en/ingestion/lakeflow-connect/jira-source-setup",
+  },
+  confluence: {
+    label: "Confluence",
+    icon: "folder",
+    status: "Beta",
+    defaultPorts: ["443"],
+    authMethods: ["OAuth 2.0"],
+    supportsPrivateLink: false,
+    category: "SaaS",
+    platforms: "Atlassian Confluence (Cloud + on-prem)",
+    docsUrl: "https://docs.databricks.com/aws/en/ingestion/lakeflow-connect/confluence-source-setup",
+  },
+  netsuite: {
+    label: "NetSuite",
+    icon: "briefcase",
+    status: "Beta",
+    defaultPorts: ["443"],
+    authMethods: ["OAuth 2.0", "Token-Based Auth"],
+    supportsPrivateLink: false,
+    category: "SaaS",
+    platforms: "Oracle NetSuite",
+    docsUrl: "https://docs.databricks.com/aws/en/ingestion/lakeflow-connect/netsuite-source-setup",
+  },
+  dynamics_365: {
+    label: "Microsoft Dynamics 365",
+    icon: "briefcase",
+    status: "Beta",
+    defaultPorts: ["443"],
+    authMethods: ["OAuth 2.0 (Entra ID)"],
+    supportsPrivateLink: false,
+    category: "SaaS",
+    platforms: "Dynamics 365 (via Azure Synapse Link)",
+    docsUrl: "https://docs.databricks.com/aws/en/ingestion/lakeflow-connect/d365-source-setup",
+  },
+  zendesk: {
+    label: "Zendesk Support",
+    icon: "wrench",
+    status: "Beta",
+    defaultPorts: ["443"],
+    authMethods: ["OAuth 2.0", "API Token"],
+    supportsPrivateLink: false,
+    category: "SaaS",
+    platforms: "zendesk.com",
+    docsUrl: "https://docs.databricks.com/aws/en/ingestion/lakeflow-connect/zendesk-support-overview",
+  },
+  google_ads: {
+    label: "Google Ads",
+    icon: "chart",
+    status: "Beta",
+    defaultPorts: ["443"],
+    authMethods: ["OAuth 2.0"],
+    supportsPrivateLink: false,
+    category: "SaaS",
+    platforms: "ads.google.com",
+    docsUrl: "https://docs.databricks.com/aws/en/ingestion/lakeflow-connect/google-ads-overview",
+  },
+  meta_ads: {
+    label: "Meta Ads",
+    icon: "chart",
+    status: "Beta",
+    defaultPorts: ["443"],
+    authMethods: ["OAuth 2.0"],
+    supportsPrivateLink: false,
+    category: "SaaS",
+    platforms: "Facebook / Instagram Ads",
+    docsUrl: "https://docs.databricks.com/aws/en/ingestion/lakeflow-connect/meta-ads",
+  },
+  tiktok_ads: {
+    label: "TikTok Ads",
+    icon: "chart",
+    status: "Beta",
+    defaultPorts: ["443"],
+    authMethods: ["OAuth 2.0"],
+    supportsPrivateLink: false,
+    category: "SaaS",
+    platforms: "ads.tiktok.com",
+    docsUrl: "https://docs.databricks.com/aws/en/ingestion/lakeflow-connect/tiktok-ads-overview",
+  },
+  zerobus: {
+    label: "Zerobus (gRPC)",
+    icon: "satellite",
+    status: "Private Preview",
+    defaultPorts: ["443"],
+    authMethods: ["Service Principal (Entra ID / OAuth M2M)"],
+    supportsPrivateLink: true,
+    category: "Streaming",
+    cdcMethod: "Push-based gRPC stream → Delta",
+    platforms: "Your own producer (Python / Java / Go / TS / Rust SDK)",
+    docsUrl: "https://docs.databricks.com/aws/en/ingestion/zerobus",
+  },
+  github_community: {
+    label: "GitHub",
+    icon: "github",
+    status: "Community",
+    defaultPorts: ["443"],
+    authMethods: ["Personal Access Token", "GitHub App"],
+    supportsPrivateLink: false,
+    category: "Community",
+    platforms: "github.com / GitHub Enterprise",
+    docsUrl: "https://github.com/databrickslabs/lakeflow-community-connectors",
+  },
+  stripe_community: {
+    label: "Stripe",
+    icon: "cloud",
+    status: "Community",
+    defaultPorts: ["443"],
+    authMethods: ["API Key"],
+    supportsPrivateLink: false,
+    category: "Community",
+    platforms: "stripe.com",
+    docsUrl: "https://github.com/databrickslabs/lakeflow-community-connectors",
+  },
 };
+
+const CONNECTOR_CATEGORIES = [
+  {
+    id: "Database",
+    label: "Database (CDC)",
+    icon: "database",
+    desc: "Stream changes from operational databases via change data capture.",
+  },
+  {
+    id: "SaaS",
+    label: "SaaS application",
+    icon: "cloud",
+    desc: "Pull from cloud SaaS products — CRM, ITSM, HR, ads, helpdesk.",
+  },
+  {
+    id: "Streaming",
+    label: "Streaming / standard",
+    icon: "satellite",
+    desc: "Push events directly into Delta via Zerobus gRPC or other low-level SDKs.",
+  },
+  {
+    id: "Community",
+    label: "Community",
+    icon: "github",
+    desc: "Open-source connectors built and maintained by the community.",
+  },
+];
 
 const CLOUDS = [
   { id: "aws",   label: "AWS",   hint: "Amazon Web Services workspace" },
@@ -462,6 +633,7 @@ function genSource(state, conn) {
       text: "Download and run the Databricks utility objects script on the source database",
       priority: "high",
       detail: "Provided in the Databricks docs. Creates helper procs/functions used by the gateway. Run as a sysadmin / db_owner.",
+      docsUrl: "https://docs.databricks.com/aws/en/ingestion/lakeflow-connect/sql-server-utility",
     });
     checks.push({
       text: "Grant minimum permissions to the ingestion user",
@@ -514,6 +686,7 @@ function genSource(state, conn) {
     checks.push({
       text: "Create a publication for the tables to replicate",
       priority: "high",
+      docsUrl: "https://docs.databricks.com/aws/en/ingestion/lakeflow-connect/postgresql-source-setup",
       code: { lang: "sql", body: "-- Specific tables\nCREATE PUBLICATION databricks_pub\n  FOR TABLE public.orders, public.customers;\n\n-- Or, all tables in the database (use cautiously)\n-- CREATE PUBLICATION databricks_pub FOR ALL TABLES;\n\n-- Verify\nSELECT * FROM pg_publication;\nSELECT * FROM pg_publication_tables WHERE pubname = 'databricks_pub';" },
     });
     checks.push({
@@ -566,6 +739,7 @@ function genSource(state, conn) {
         text: "Enable binary logging with ROW format and FULL row image",
         priority: "blocker",
         detail: "binlog_format=ROW and binlog_row_image=FULL are required for the MySQL CDC reader. Managed services apply via parameter groups; self-hosted edits my.cnf.",
+        docsUrl: "https://docs.databricks.com/aws/en/ingestion/lakeflow-connect/mysql-source-setup",
         code: block,
       });
     }
@@ -606,6 +780,7 @@ function genSource(state, conn) {
       text: "Create a Connected App in Salesforce with OAuth 2.0 enabled",
       priority: "high",
       detail: "Setup → App Manager → New Connected App → Enable OAuth Settings. Add the Databricks callback URL (shown when you create the UC Connection).",
+      docsUrl: "https://docs.databricks.com/aws/en/ingestion/lakeflow-connect/salesforce-concepts",
       code: { lang: "yaml", body: "OAuth Scopes:\n  - api               # Access and manage your data\n  - refresh_token     # Required for long-lived ingestion\n  - offline_access    # 8.0+ orgs\n\nCallback URL:\n  https://<workspace-host>/login/oauth/salesforce/callback\n\nIP Relaxation:\n  Relax IP restrictions for refresh tokens (for non-IP-restricted ingest)" },
     });
     checks.push({
@@ -635,23 +810,23 @@ function genSource(state, conn) {
 
   if (state.connector === "workday") {
     checks.push({ text: "Create an Integration System User (ISU) in Workday", priority: "high", detail: "Workbench → Create Integration System User → assign to an Integration System Security Group with the right Domain Security Policies." });
-    checks.push({ text: "Configure Workday Reports (Custom Reports) that expose the data to ingest", priority: "high", detail: "Lakeflow Connect for Workday reads from Workday-as-a-Service URLs of Custom Reports — make sure each report is enabled as a web service." });
+    checks.push({ text: "Configure Workday Reports (Custom Reports) that expose the data to ingest", priority: "high", detail: "Lakeflow Connect for Workday reads from Workday-as-a-Service URLs of Custom Reports — make sure each report is enabled as a web service.", docsUrl: "https://docs.databricks.com/aws/en/ingestion/lakeflow-connect/workday-reports-source-setup" });
     checks.push({ text: "Verify Workday API access and tenant URL", priority: "high" });
   }
 
   if (state.connector === "servicenow") {
-    checks.push({ text: "Create an OAuth application in ServiceNow or configure a Basic Auth integration user", priority: "high", detail: "System OAuth → Application Registry → New → Create an OAuth API endpoint for external clients." });
+    checks.push({ text: "Create an OAuth application in ServiceNow or configure a Basic Auth integration user", priority: "high", detail: "System OAuth → Application Registry → New → Create an OAuth API endpoint for external clients.", docsUrl: "https://docs.databricks.com/aws/en/ingestion/lakeflow-connect/servicenow-source-setup" });
     checks.push({ text: "Grant table-level read ACLs to the integration user", priority: "high" });
     checks.push({ text: "Verify the ServiceNow instance allows REST API access", priority: "high" });
   }
 
   if (state.connector === "sharepoint") {
-    checks.push({ text: "Register an Entra ID App with Microsoft Graph Sites.Read.All or Sites.Selected", priority: "high" });
+    checks.push({ text: "Register an Entra ID App with Microsoft Graph Sites.Read.All or Sites.Selected", priority: "high", docsUrl: "https://docs.databricks.com/aws/en/ingestion/lakeflow-connect/sharepoint-source-setup-overview" });
     checks.push({ text: "Identify SharePoint site IDs and document library paths to ingest", priority: "high" });
   }
 
   if (state.connector === "google_analytics") {
-    checks.push({ text: "Create a GCP Service Account and grant Viewer role on the GA4 property", priority: "high" });
+    checks.push({ text: "Create a GCP Service Account and grant Viewer role on the GA4 property", priority: "high", docsUrl: "https://docs.databricks.com/aws/en/ingestion/lakeflow-connect/google-analytics" });
     checks.push({ text: "Note the GA4 Property ID", priority: "high", detail: "Find this in GA4 Admin → Property Settings → Property ID." });
   }
 
@@ -1150,7 +1325,7 @@ function AppFooter() {
 /* ───────── MAIN APP ───────── */
 
 const STEPS = ["Connector", "Cloud", "Source", "Network", "Auth", "Results"];
-const initialState = { connector: null, cloud: null, sourceLocation: null, networkModel: null, authMethod: null, sourceHost: "" };
+const initialState = { connectorCategory: null, connector: null, cloud: null, sourceLocation: null, networkModel: null, authMethod: null, sourceHost: "" };
 
 export default function App() {
   const [started, setStarted] = useState(false);
@@ -1318,43 +1493,102 @@ function checkRowKey(category, idx, text) {
 /* ───────── STEPS ───────── */
 
 function StepConnector({ state, set }) {
+  const pickCategory = (id) => {
+    // Switching category clears any previously selected connector if it
+    // doesn't belong to the new category — otherwise the wizard would
+    // claim a hidden selection.
+    set("connectorCategory", id);
+    if (state.connector && CONNECTORS[state.connector]?.category !== id) {
+      set("connector", null);
+    }
+  };
+
+  const filtered = useMemo(() => {
+    if (!state.connectorCategory) return [];
+    return Object.entries(CONNECTORS).filter(
+      ([, c]) => c.category === state.connectorCategory
+    );
+  }, [state.connectorCategory]);
+
+  const activeCat = CONNECTOR_CATEGORIES.find((c) => c.id === state.connectorCategory);
+
   return (
     <>
       <div className="step-eyebrow">Step 1 · Source</div>
       <h1 className="step-title">Pick the source you want to ingest</h1>
       <p className="step-desc">
-        We'll tailor every downstream check — credentials, networking, source-side prep — to the connector you choose.
+        Start by picking the source category — we'll narrow the connector list to fit.
       </p>
-      <div className="tile-grid">
-        {Object.entries(CONNECTORS).map(([id, c]) => {
-          const sel = state.connector === id;
+
+      <div className="section-eyebrow">Connector type</div>
+      <div className="tile-grid compact-2x2">
+        {CONNECTOR_CATEGORIES.map((cat) => {
+          const sel = state.connectorCategory === cat.id;
           return (
             <button
-              key={id}
+              key={cat.id}
               className={`tile ${sel ? "selected" : ""}`}
-              onClick={() => set("connector", id)}
+              onClick={() => pickCategory(cat.id)}
               aria-pressed={sel}
             >
-              <span className="tile-check" aria-hidden><Icon name="check" size={12} strokeWidth={2.5} /></span>
+              <span className="tile-check" aria-hidden>
+                <Icon name="check" size={12} strokeWidth={2.5} />
+              </span>
               <div className="tile-head">
-                <span className="tile-icon"><Icon name={c.icon} size={22} /></span>
+                <span className="tile-icon"><Icon name={cat.icon} size={22} /></span>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div className="tile-label">{c.label}</div>
-                  <div className="tile-cat-row">
-                    <span className="tile-cat">{c.category}</span>
-                    <StatusBadge status={c.status} />
-                  </div>
+                  <div className="tile-label">{cat.label}</div>
+                  <div className="tile-cat">{cat.desc}</div>
                 </div>
-              </div>
-              <div className="tile-meta">
-                <div className="tile-meta-row"><span>Default ports</span><b>{c.defaultPorts.join(", ")}</b></div>
-                <div className="tile-meta-row"><span>Auth</span><b>{c.authMethods[0]}{c.authMethods.length > 1 ? ` +${c.authMethods.length - 1}` : ""}</b></div>
-                {c.cdcMethod && <div className="tile-meta-row"><span>CDC</span><b>{c.cdcMethod}</b></div>}
               </div>
             </button>
           );
         })}
       </div>
+
+      {activeCat && (
+        <>
+          <div className="section-eyebrow" style={{ marginTop: 28 }}>
+            {activeCat.label} connectors ({filtered.length})
+          </div>
+          {filtered.length === 0 ? (
+            <div className="empty">No connectors in this category yet.</div>
+          ) : (
+            <div className="tile-grid">
+              {filtered.map(([id, c]) => {
+                const sel = state.connector === id;
+                return (
+                  <button
+                    key={id}
+                    className={`tile ${sel ? "selected" : ""}`}
+                    onClick={() => set("connector", id)}
+                    aria-pressed={sel}
+                  >
+                    <span className="tile-check" aria-hidden>
+                      <Icon name="check" size={12} strokeWidth={2.5} />
+                    </span>
+                    <div className="tile-head">
+                      <span className="tile-icon"><Icon name={c.icon} size={22} /></span>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div className="tile-label">{c.label}</div>
+                        <div className="tile-cat-row">
+                          <span className="tile-cat">{c.category}</span>
+                          <StatusBadge status={c.status} />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="tile-meta">
+                      <div className="tile-meta-row"><span>Default ports</span><b>{c.defaultPorts.join(", ")}</b></div>
+                      <div className="tile-meta-row"><span>Auth</span><b>{c.authMethods[0]}{c.authMethods.length > 1 ? ` +${c.authMethods.length - 1}` : ""}</b></div>
+                      {c.cdcMethod && <div className="tile-meta-row"><span>CDC</span><b>{c.cdcMethod}</b></div>}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </>
+      )}
     </>
   );
 }
@@ -1756,7 +1990,20 @@ function StepResults({
                           {isChecked && <Icon name="check" size={12} strokeWidth={2.5} />}
                         </button>
                         <div className="check-content">
-                          <div className="check-text">{c.text}</div>
+                          <div className="check-text">
+                            {c.text}
+                            {c.docsUrl && (
+                              <a
+                                href={c.docsUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="check-doc-link"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                Docs <Icon name="arrowRight" size={11} />
+                              </a>
+                            )}
+                          </div>
                           {c.detail && <div className="check-detail">{c.detail}</div>}
                           {c.code && <CodeBlock code={c.code} />}
                         </div>

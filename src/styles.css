@@ -601,6 +601,18 @@ input, select, textarea {
   max-width: 720px;
 }
 
+.tile-grid.compact-2x2 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  max-width: 1080px;
+  margin-bottom: 12px;
+}
+
+@media (max-width: 1100px) {
+  .tile-grid.compact-2x2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (min-width: 1200px) {
   .tile-grid:not(.compact) {
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1178,6 +1190,32 @@ input, select, textarea {
   color: var(--text-secondary);
   line-height: 1.55;
 }
+
+.check-doc-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 8px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid rgba(255, 54, 33, 0.3);
+  text-decoration: none;
+  vertical-align: 2px;
+  transition: background 120ms ease, color 120ms ease;
+  white-space: nowrap;
+}
+
+.check-doc-link:hover {
+  background: rgba(255, 54, 33, 0.18);
+  color: #fff;
+}
+
+.check-doc-link svg { transform: rotate(-45deg); }
 
 /* ────────── Code block ────────── */
 
