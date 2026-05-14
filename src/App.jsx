@@ -256,16 +256,113 @@ const CONNECTORS = {
     docsUrl: "https://docs.databricks.com/aws/en/ingestion/lakeflow-connect/tiktok-ads-overview",
   },
   zerobus: {
-    label: "Zerobus (gRPC)",
+    label: "Zerobus Ingest (gRPC)",
     icon: "satellite",
-    status: "Private Preview",
+    status: "GA",
     defaultPorts: ["443"],
     authMethods: ["Service Principal (Entra ID / OAuth M2M)"],
     supportsPrivateLink: true,
     category: "Streaming",
     cdcMethod: "Push-based gRPC stream → Delta",
     platforms: "Your own producer (Python / Java / Go / TS / Rust SDK)",
-    docsUrl: "https://docs.databricks.com/aws/en/ingestion/zerobus",
+    docsUrl: "https://docs.databricks.com/aws/en/ingestion/zerobus-overview",
+  },
+  zerobus_rest: {
+    label: "Zerobus Ingest REST API",
+    icon: "satellite",
+    status: "Beta",
+    defaultPorts: ["443"],
+    authMethods: ["Service Principal (OAuth M2M)", "PAT"],
+    supportsPrivateLink: true,
+    category: "Streaming",
+    cdcMethod: "Push-based HTTPS POST → Delta",
+    platforms: "Any HTTPS client (curl, fetch, Kafka Connect HTTP, etc.)",
+    docsUrl: "https://docs.databricks.com/aws/en/ingestion/zerobus-ingest",
+  },
+  zerobus_otlp: {
+    label: "Zerobus OpenTelemetry (OTLP)",
+    icon: "satellite",
+    status: "Beta",
+    defaultPorts: ["443"],
+    authMethods: ["Service Principal (OAuth M2M)"],
+    supportsPrivateLink: true,
+    category: "Streaming",
+    cdcMethod: "OTLP traces / logs / metrics → predefined Delta schemas",
+    platforms: "OpenTelemetry SDKs and Collector (HTTP / gRPC exporters)",
+    docsUrl: "https://docs.databricks.com/aws/en/ingestion/opentelemetry/",
+  },
+  oracle_query: {
+    label: "Oracle",
+    icon: "database",
+    status: "Public Preview",
+    defaultPorts: ["1521"],
+    authMethods: ["Database Auth"],
+    supportsPrivateLink: true,
+    category: "Query",
+    cdcMethod: "Scheduled query (incremental column / watermark)",
+    minVersion: "11g+ (12c+ recommended)",
+    platforms: "Oracle DB (on-prem), AWS RDS, OCI Autonomous, Exadata",
+    docsUrl: "https://docs.databricks.com/aws/en/query-federation/oracle",
+  },
+  teradata_query: {
+    label: "Teradata",
+    icon: "database",
+    status: "Public Preview",
+    defaultPorts: ["1025"],
+    authMethods: ["TD2 (Teradata native)"],
+    supportsPrivateLink: true,
+    category: "Query",
+    cdcMethod: "Scheduled query (incremental column / watermark)",
+    platforms: "Teradata Vantage (cloud + on-prem)",
+    docsUrl: "https://docs.databricks.com/aws/en/query-federation/teradata",
+  },
+  sql_server_query: {
+    label: "SQL Server (query)",
+    icon: "database",
+    status: "Public Preview",
+    defaultPorts: ["1433"],
+    authMethods: ["SQL Auth", "Entra ID (AAD)"],
+    supportsPrivateLink: true,
+    category: "Query",
+    cdcMethod: "Scheduled query (incremental column / watermark)",
+    platforms: "Azure SQL, Azure SQL MI, AWS RDS, EC2, On-Premises",
+    docsUrl: "https://docs.databricks.com/aws/en/ingestion/lakeflow-connect/query-based-overview",
+  },
+  mysql_query: {
+    label: "MySQL (query)",
+    icon: "database",
+    status: "Public Preview",
+    defaultPorts: ["3306"],
+    authMethods: ["Database Auth"],
+    supportsPrivateLink: true,
+    category: "Query",
+    cdcMethod: "Scheduled query (incremental column / watermark)",
+    platforms: "Amazon RDS, Aurora MySQL, Azure DB for MySQL, GCP Cloud SQL, EC2",
+    docsUrl: "https://docs.databricks.com/aws/en/ingestion/lakeflow-connect/query-based-overview",
+  },
+  mariadb_query: {
+    label: "MariaDB",
+    icon: "database",
+    status: "Public Preview",
+    defaultPorts: ["3306"],
+    authMethods: ["Database Auth"],
+    supportsPrivateLink: true,
+    category: "Query",
+    cdcMethod: "Scheduled query (incremental column / watermark)",
+    platforms: "MariaDB Server, AWS RDS for MariaDB",
+    docsUrl: "https://docs.databricks.com/aws/en/ingestion/lakeflow-connect/query-based-overview",
+  },
+  postgresql_query: {
+    label: "PostgreSQL (query)",
+    icon: "database",
+    status: "Public Preview",
+    defaultPorts: ["5432"],
+    authMethods: ["Database Auth"],
+    supportsPrivateLink: true,
+    category: "Query",
+    cdcMethod: "Scheduled query (incremental column / watermark)",
+    platforms: "Azure DB for PostgreSQL, AWS RDS, Aurora, EC2, GCP Cloud SQL, On-Premises",
+    docsUrl: "https://docs.databricks.com/aws/en/ingestion/lakeflow-connect/query-based-overview",
   },
   github_community: {
     label: "GitHub",
@@ -299,6 +396,12 @@ const CONNECTOR_CATEGORIES = [
     desc: "Stream changes from operational databases via change data capture.",
   },
   {
+    id: "Query",
+    label: "Query-based",
+    icon: "network",
+    desc: "Scheduled SELECTs against a foreign connection — Oracle, Teradata, SQL Server, MySQL, MariaDB, PostgreSQL.",
+  },
+  {
     id: "SaaS",
     label: "SaaS application",
     icon: "cloud",
@@ -308,7 +411,7 @@ const CONNECTOR_CATEGORIES = [
     id: "Streaming",
     label: "Streaming / standard",
     icon: "satellite",
-    desc: "Push events directly into Delta via Zerobus gRPC or other low-level SDKs.",
+    desc: "Push events directly into Delta via Zerobus gRPC, REST, or OTLP.",
   },
   {
     id: "Community",
@@ -587,11 +690,29 @@ function genWorkspace(state, conn) {
     checks.push({ text: "Create a staging catalog/schema for the ingestion gateway", priority: "high" });
   }
 
-  checks.push({
-    text: "Create a Unity Catalog Connection object for the source",
-    priority: "high",
-    code: { lang: "sql", body: `-- Run in a SQL editor against the workspace metastore\nCREATE CONNECTION ${state.connector || "src"}_conn\n  TYPE ${conn.category === "Database" ? `'${(state.connector || "").toUpperCase()}'` : `'${(conn.label || "").toUpperCase().replace(/\\s+/g, "_")}'`}\n  OPTIONS (\n    host     '<source-host>',\n    port     '${conn.defaultPorts[0]}',\n    user     secret('lakeflow-ingest', 'src_user'),\n    password secret('lakeflow-ingest', 'src_password')\n  );\n\n-- Verify\nDESCRIBE CONNECTION ${state.connector || "src"}_conn;` },
-  });
+  {
+    // UC CONNECTION TYPE expects the source product name (not our internal id).
+    const UC_CONN_TYPE = {
+      sql_server: "SQLSERVER",
+      postgresql: "POSTGRESQL",
+      mysql:      "MYSQL",
+      oracle_query:     "ORACLE",
+      teradata_query:   "TERADATA",
+      sql_server_query: "SQLSERVER",
+      mysql_query:      "MYSQL",
+      mariadb_query:    "MYSQL",
+      postgresql_query: "POSTGRESQL",
+    };
+    const ucType =
+      UC_CONN_TYPE[state.connector] ||
+      (conn.label || "").toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_|_$/g, "");
+    const slug = (state.connector || "src").replace(/_query$/, "");
+    checks.push({
+      text: "Create a Unity Catalog Connection object for the source",
+      priority: "high",
+      code: { lang: "sql", body: `-- Run in a SQL editor against the workspace metastore\nCREATE CONNECTION ${slug}_conn\n  TYPE '${ucType}'\n  OPTIONS (\n    host     '<source-host>',\n    port     '${conn.defaultPorts[0]}',\n    user     secret('lakeflow-ingest', 'src_user'),\n    password secret('lakeflow-ingest', 'src_password')\n  );\n\n-- Verify\nDESCRIBE CONNECTION ${slug}_conn;` },
+    });
+  }
 
   if (state.cloud === "azure" && state.networkModel === "private_link") {
     checks.push({ text: "Configure a Network Connectivity Configuration (NCC) for serverless Private Link", priority: "high", detail: "Required for serverless compute to reach private endpoints in your VNet." });
@@ -828,6 +949,144 @@ function genSource(state, conn) {
   if (state.connector === "google_analytics") {
     checks.push({ text: "Create a GCP Service Account and grant Viewer role on the GA4 property", priority: "high", docsUrl: "https://docs.databricks.com/aws/en/ingestion/lakeflow-connect/google-analytics" });
     checks.push({ text: "Note the GA4 Property ID", priority: "high", detail: "Find this in GA4 Admin → Property Settings → Property ID." });
+  }
+
+  // ── Oracle (query-based, via Lakehouse Federation foreign connection) ──
+  if (state.connector === "oracle_query") {
+    checks.push({
+      text: "Confirm Oracle version is 11g or later (12c+ recommended)",
+      priority: "blocker",
+      docsUrl: "https://docs.databricks.com/aws/en/query-federation/oracle",
+      code: { lang: "sql", body: "SELECT * FROM v$version;\nSELECT banner_full FROM v$version_full;" },
+    });
+    checks.push({
+      text: "Enable server-side Oracle Native Network Encryption (NNE) — or use TLS on OCI",
+      priority: "high",
+      detail: "Lakehouse Federation requires the Oracle server's SQLNET.ENCRYPTION_SERVER set to at least 'ACCEPTED'. Oracle Cloud Autonomous Database already uses TLS.",
+      code: { lang: "ini", body: "# sqlnet.ora on the Oracle server\nSQLNET.ENCRYPTION_SERVER       = ACCEPTED\nSQLNET.ENCRYPTION_TYPES_SERVER = (AES256, AES192, AES128)\nSQLNET.CRYPTO_CHECKSUM_SERVER  = ACCEPTED" },
+    });
+    checks.push({
+      text: "Create a dedicated read-only Oracle user for Databricks",
+      priority: "high",
+      code: { lang: "sql", body: "-- Run as a privileged admin (e.g. SYSTEM)\nCREATE USER databricks_reader IDENTIFIED BY \"<strong-password>\";\nGRANT CREATE SESSION             TO databricks_reader;\nGRANT SELECT ANY DICTIONARY      TO databricks_reader;  -- needed for metadata\n-- Grant SELECT on each schema / table to ingest:\nGRANT SELECT ON <owner>.<table>  TO databricks_reader;" },
+    });
+    checks.push({
+      text: "Identify a watermark / incremental column per table",
+      priority: "high",
+      detail: "Query-based ingestion runs scheduled SELECT WHERE <watermark> > <last>. Pick a strictly-monotonic column (timestamp, SCN, sequence). If none exists you can fall back to full snapshots, but it's expensive.",
+    });
+    checks.push({
+      text: "Identify the Oracle service name (or SID) and EZConnect string",
+      priority: "medium",
+      detail: "UC Connection takes host:port/service_name. SIDs work too but service_name is preferred.",
+      code: { lang: "sql", body: "-- Check what's available\nSELECT value FROM v$parameter WHERE name = 'service_names';\nSELECT instance_name FROM v$instance;" },
+    });
+  }
+
+  // ── Teradata (query-based, via Lakehouse Federation foreign connection) ──
+  if (state.connector === "teradata_query") {
+    checks.push({
+      text: "Confirm TD2 authentication is allowed on the Teradata system",
+      priority: "blocker",
+      docsUrl: "https://docs.databricks.com/aws/en/query-federation/teradata",
+      detail: "Lakehouse Federation only supports the default TD2 mechanism. LDAP / Kerberos / TDNEGO are not supported.",
+    });
+    checks.push({
+      text: "Create a dedicated read-only Teradata user for Databricks",
+      priority: "high",
+      code: { lang: "sql", body: "-- Run as a DBA\nCREATE USER databricks_reader\n  FROM <parent_db>\n  AS PASSWORD = <strong-password>\n     PERM     = 1000000;\n\n-- Grant SELECT on each table/view to ingest:\nGRANT SELECT ON <db>.<table> TO databricks_reader;" },
+    });
+    checks.push({
+      text: "Confirm Teradata port (1025 for default, 443 for HTTPS) is reachable",
+      priority: "high",
+      detail: "Network reachability is validated in the connectivity step; this is just the source-side handshake confirmation.",
+    });
+    checks.push({
+      text: "Identify a watermark / incremental column per table",
+      priority: "high",
+      detail: "Pick a column that strictly increases over time (timestamp, identity column). Required for cheap incremental ingestion.",
+    });
+  }
+
+  // ── Generic query-based connector setup (SQL Server / MySQL / MariaDB / PostgreSQL query variants) ──
+  if (
+    state.connector === "sql_server_query" ||
+    state.connector === "mysql_query"     ||
+    state.connector === "mariadb_query"   ||
+    state.connector === "postgresql_query"
+  ) {
+    checks.push({
+      text: "Create a dedicated read-only database user for Databricks",
+      priority: "high",
+      docsUrl: "https://docs.databricks.com/aws/en/ingestion/lakeflow-connect/query-based-overview",
+      detail: "GRANT SELECT only on the tables/views you intend to ingest. No CDC/replication privileges needed for query-based ingestion.",
+    });
+    checks.push({
+      text: "Identify a watermark / incremental column per table",
+      priority: "high",
+      detail: "Query-based ingestion runs scheduled SELECTs filtered by this column. Without one, you're stuck with full snapshots.",
+    });
+    checks.push({
+      text: "Decide whether to mirror as a foreign catalog or materialize as scheduled queries",
+      priority: "medium",
+      detail: "Foreign catalog (Lakehouse Federation) keeps data in the source — good for low-volume browsing. Scheduled ingestion materializes into Delta — required for analytics scale and SLAs.",
+    });
+  }
+
+  // ── Zerobus variants ──
+  if (state.connector === "zerobus") {
+    checks.push({
+      text: "Build a producer using the Zerobus Ingest gRPC SDK",
+      priority: "high",
+      docsUrl: "https://docs.databricks.com/aws/en/ingestion/zerobus-overview",
+      detail: "SDKs are available for Python, Java, Go, TypeScript, and Rust. The producer holds an ACK-based gRPC stream — implement retry with exponential backoff and a circuit breaker.",
+    });
+    checks.push({
+      text: "Define a target Delta table with an explicit Protobuf schema",
+      priority: "high",
+      detail: "Zerobus needs a `.proto` schema that maps to your Delta columns. Use the SDK's schema-gen helper from a UC table, or hand-write the proto and let UC enforce.",
+    });
+    checks.push({
+      text: "Plan for delivery semantics — Zerobus is at-least-once",
+      priority: "high",
+      detail: "Use a producer-side dedup key (request_id) and MERGE on the downstream side if you need exactly-once.",
+    });
+  }
+  if (state.connector === "zerobus_rest") {
+    checks.push({
+      text: "Use the Zerobus Ingest REST API to push events over HTTPS",
+      priority: "high",
+      docsUrl: "https://docs.databricks.com/aws/en/ingestion/zerobus-ingest",
+      detail: "POST to /api/2.0/ingest/zerobus with a JSON-encoded payload. Each request is independent — easier to integrate from environments without a gRPC client.",
+    });
+    checks.push({
+      text: "Acquire an OAuth M2M token from your service principal",
+      priority: "high",
+      detail: "Use the /oidc/v1/token endpoint with client_credentials grant. Cache the token until ~60s before expiry.",
+    });
+    checks.push({
+      text: "⚠️ REST API is Beta — throughput / SLA may differ from the gRPC variant",
+      priority: "info",
+      detail: "Throughput is lower than the gRPC SDK because of HTTP/1.1 per-request overhead. For high-volume writes prefer the gRPC SDK.",
+    });
+  }
+  if (state.connector === "zerobus_otlp") {
+    checks.push({
+      text: "Point your OpenTelemetry SDK or Collector at the Zerobus OTLP endpoint",
+      priority: "high",
+      docsUrl: "https://docs.databricks.com/aws/en/ingestion/opentelemetry/",
+      detail: "Tables for traces / logs / metrics are predefined — your OTLP payload has to use the standard semantic conventions.",
+    });
+    checks.push({
+      text: "Authenticate the OTLP exporter via Databricks PAT or OAuth M2M token",
+      priority: "high",
+      detail: "Set the OTLP exporter's Authorization header to `Bearer <token>`. Most SDKs/Collectors support this via OTEL_EXPORTER_OTLP_HEADERS.",
+    });
+    checks.push({
+      text: "⚠️ Zerobus OTLP is Beta and not currently billed",
+      priority: "info",
+      detail: "Pricing will change when it leaves Beta. Plan capacity accordingly before going to GA.",
+    });
   }
 
   return checks;
