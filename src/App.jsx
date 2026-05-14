@@ -1324,7 +1324,7 @@ function AppFooter() {
 
 /* ───────── MAIN APP ───────── */
 
-const STEPS = ["Connector", "Cloud", "Source", "Network", "Auth", "Results"];
+const STEPS = ["Category", "Connector", "Cloud", "Source", "Network", "Auth", "Results"];
 const initialState = { connectorCategory: null, connector: null, cloud: null, sourceLocation: null, networkModel: null, authMethod: null, sourceHost: "" };
 
 export default function App() {
@@ -1377,11 +1377,12 @@ export default function App() {
   const highCount = allChecks.filter((c) => c.priority === "high").length;
 
   const canNext = (() => {
-    if (step === 0) return !!state.connector;
-    if (step === 1) return !!state.cloud;
-    if (step === 2) return !!state.sourceLocation;
-    if (step === 3) return !!state.networkModel;
-    if (step === 4) return !!state.authMethod;
+    if (step === 0) return !!state.connectorCategory;
+    if (step === 1) return !!state.connector;
+    if (step === 2) return !!state.cloud;
+    if (step === 3) return !!state.sourceLocation;
+    if (step === 4) return !!state.networkModel;
+    if (step === 5) return !!state.authMethod;
     return false;
   })();
 
@@ -1397,11 +1398,12 @@ export default function App() {
   // Furthest step the user has reached (highest visited index)
   const maxReachable = useMemo(() => {
     let m = 0;
-    if (state.connector) m = Math.max(m, 1);
-    if (state.cloud) m = Math.max(m, 2);
-    if (state.sourceLocation) m = Math.max(m, 3);
-    if (state.networkModel) m = Math.max(m, 4);
-    if (state.authMethod) m = Math.max(m, 5);
+    if (state.connectorCategory) m = Math.max(m, 1);
+    if (state.connector) m = Math.max(m, 2);
+    if (state.cloud) m = Math.max(m, 3);
+    if (state.sourceLocation) m = Math.max(m, 4);
+    if (state.networkModel) m = Math.max(m, 5);
+    if (state.authMethod) m = Math.max(m, 6);
     return Math.max(m, step);
   }, [state, step]);
 
@@ -1436,12 +1438,13 @@ export default function App() {
 
         <main className="app-main" ref={scrollRef}>
           <div className="step-body" key={step}>
-            {step === 0 && <StepConnector state={state} set={set} />}
-            {step === 1 && <StepCloud state={state} set={set} />}
-            {step === 2 && <StepSource state={state} set={set} conn={conn} />}
-            {step === 3 && <StepNetwork state={state} set={set} models={availableNetworkModels} />}
-            {step === 4 && <StepAuth state={state} set={set} conn={conn} />}
-            {step === 5 && (
+            {step === 0 && <StepCategory state={state} set={set} />}
+            {step === 1 && <StepConnector state={state} set={set} />}
+            {step === 2 && <StepCloud state={state} set={set} />}
+            {step === 3 && <StepSource state={state} set={set} conn={conn} />}
+            {step === 4 && <StepNetwork state={state} set={set} models={availableNetworkModels} />}
+            {step === 5 && <StepAuth state={state} set={set} conn={conn} />}
+            {step === 6 && (
               <StepResults
                 state={state}
                 checklist={checklist}
@@ -1460,7 +1463,7 @@ export default function App() {
             )}
           </div>
 
-          {step < 5 && (
+          {step < 6 && (
             <div className="actions">
               <div className="actions-group">
                 <button className="btn btn-ghost" onClick={back} disabled={step === 0}>
@@ -1492,35 +1495,24 @@ function checkRowKey(category, idx, text) {
 
 /* ───────── STEPS ───────── */
 
-function StepConnector({ state, set }) {
-  const pickCategory = (id) => {
-    // Switching category clears any previously selected connector if it
-    // doesn't belong to the new category — otherwise the wizard would
-    // claim a hidden selection.
+function StepCategory({ state, set }) {
+  const pick = (id) => {
     set("connectorCategory", id);
+    // Clear a stale connector selection if it doesn't belong to the
+    // newly chosen category — otherwise the next step would claim a
+    // hidden selection.
     if (state.connector && CONNECTORS[state.connector]?.category !== id) {
       set("connector", null);
     }
   };
 
-  const filtered = useMemo(() => {
-    if (!state.connectorCategory) return [];
-    return Object.entries(CONNECTORS).filter(
-      ([, c]) => c.category === state.connectorCategory
-    );
-  }, [state.connectorCategory]);
-
-  const activeCat = CONNECTOR_CATEGORIES.find((c) => c.id === state.connectorCategory);
-
   return (
     <>
-      <div className="step-eyebrow">Step 1 · Source</div>
-      <h1 className="step-title">Pick the source you want to ingest</h1>
+      <div className="step-eyebrow">Step 1 · Source category</div>
+      <h1 className="step-title">What kind of source are you ingesting from?</h1>
       <p className="step-desc">
-        Start by picking the source category — we'll narrow the connector list to fit.
+        We'll narrow the connector list in the next step to fit the category you pick here.
       </p>
-
-      <div className="section-eyebrow">Connector type</div>
       <div className="tile-grid compact-2x2">
         {CONNECTOR_CATEGORIES.map((cat) => {
           const sel = state.connectorCategory === cat.id;
@@ -1528,7 +1520,7 @@ function StepConnector({ state, set }) {
             <button
               key={cat.id}
               className={`tile ${sel ? "selected" : ""}`}
-              onClick={() => pickCategory(cat.id)}
+              onClick={() => pick(cat.id)}
               aria-pressed={sel}
             >
               <span className="tile-check" aria-hidden>
@@ -1545,49 +1537,66 @@ function StepConnector({ state, set }) {
           );
         })}
       </div>
+    </>
+  );
+}
 
-      {activeCat && (
-        <>
-          <div className="section-eyebrow" style={{ marginTop: 28 }}>
-            {activeCat.label} connectors ({filtered.length})
-          </div>
-          {filtered.length === 0 ? (
-            <div className="empty">No connectors in this category yet.</div>
-          ) : (
-            <div className="tile-grid">
-              {filtered.map(([id, c]) => {
-                const sel = state.connector === id;
-                return (
-                  <button
-                    key={id}
-                    className={`tile ${sel ? "selected" : ""}`}
-                    onClick={() => set("connector", id)}
-                    aria-pressed={sel}
-                  >
-                    <span className="tile-check" aria-hidden>
-                      <Icon name="check" size={12} strokeWidth={2.5} />
-                    </span>
-                    <div className="tile-head">
-                      <span className="tile-icon"><Icon name={c.icon} size={22} /></span>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div className="tile-label">{c.label}</div>
-                        <div className="tile-cat-row">
-                          <span className="tile-cat">{c.category}</span>
-                          <StatusBadge status={c.status} />
-                        </div>
-                      </div>
+function StepConnector({ state, set }) {
+  const filtered = useMemo(() => {
+    if (!state.connectorCategory) return [];
+    return Object.entries(CONNECTORS).filter(
+      ([, c]) => c.category === state.connectorCategory
+    );
+  }, [state.connectorCategory]);
+
+  const activeCat = CONNECTOR_CATEGORIES.find((c) => c.id === state.connectorCategory);
+
+  return (
+    <>
+      <div className="step-eyebrow">
+        Step 2 · {activeCat?.label || "Source"} connector
+      </div>
+      <h1 className="step-title">Pick the source you want to ingest</h1>
+      <p className="step-desc">
+        {activeCat
+          ? `Choose a ${activeCat.label.toLowerCase()} — we'll tailor every downstream check to it.`
+          : "Pick the connector — every downstream check is tailored to your choice."}
+      </p>
+      {filtered.length === 0 ? (
+        <div className="empty">No connectors in this category yet. Go back and pick a different one.</div>
+      ) : (
+        <div className="tile-grid">
+          {filtered.map(([id, c]) => {
+            const sel = state.connector === id;
+            return (
+              <button
+                key={id}
+                className={`tile ${sel ? "selected" : ""}`}
+                onClick={() => set("connector", id)}
+                aria-pressed={sel}
+              >
+                <span className="tile-check" aria-hidden>
+                  <Icon name="check" size={12} strokeWidth={2.5} />
+                </span>
+                <div className="tile-head">
+                  <span className="tile-icon"><Icon name={c.icon} size={22} /></span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div className="tile-label">{c.label}</div>
+                    <div className="tile-cat-row">
+                      <span className="tile-cat">{c.category}</span>
+                      <StatusBadge status={c.status} />
                     </div>
-                    <div className="tile-meta">
-                      <div className="tile-meta-row"><span>Default ports</span><b>{c.defaultPorts.join(", ")}</b></div>
-                      <div className="tile-meta-row"><span>Auth</span><b>{c.authMethods[0]}{c.authMethods.length > 1 ? ` +${c.authMethods.length - 1}` : ""}</b></div>
-                      {c.cdcMethod && <div className="tile-meta-row"><span>CDC</span><b>{c.cdcMethod}</b></div>}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-        </>
+                  </div>
+                </div>
+                <div className="tile-meta">
+                  <div className="tile-meta-row"><span>Default ports</span><b>{c.defaultPorts.join(", ")}</b></div>
+                  <div className="tile-meta-row"><span>Auth</span><b>{c.authMethods[0]}{c.authMethods.length > 1 ? ` +${c.authMethods.length - 1}` : ""}</b></div>
+                  {c.cdcMethod && <div className="tile-meta-row"><span>CDC</span><b>{c.cdcMethod}</b></div>}
+                </div>
+              </button>
+            );
+          })}
+        </div>
       )}
     </>
   );
@@ -1596,7 +1605,7 @@ function StepConnector({ state, set }) {
 function StepCloud({ state, set }) {
   return (
     <>
-      <div className="step-eyebrow">Step 2 · Workspace cloud</div>
+      <div className="step-eyebrow">Step 3 · Workspace cloud</div>
       <h1 className="step-title">Where does your Databricks workspace live?</h1>
       <p className="step-desc">
         Used to scope cloud-specific networking guidance (NCC, Private Endpoint, NAT egress, etc).
@@ -1630,7 +1639,7 @@ function StepSource({ state, set, conn }) {
   const isSaaS = conn?.category === "SaaS";
   return (
     <>
-      <div className="step-eyebrow">Step 3 · Source location</div>
+      <div className="step-eyebrow">Step 4 · Source location</div>
       <h1 className="step-title">Where does the source system run?</h1>
       <p className="step-desc">
         {isSaaS
@@ -1667,7 +1676,7 @@ function StepSource({ state, set, conn }) {
 function StepNetwork({ state, set, models }) {
   return (
     <>
-      <div className="step-eyebrow">Step 4 · Connectivity</div>
+      <div className="step-eyebrow">Step 5 · Connectivity</div>
       <h1 className="step-title">How will Databricks reach the source?</h1>
       <p className="step-desc">
         Only the topologies compatible with your source location are shown.
@@ -1716,7 +1725,7 @@ function StepAuth({ state, set, conn }) {
   if (!conn) return null;
   return (
     <>
-      <div className="step-eyebrow">Step 5 · Authentication</div>
+      <div className="step-eyebrow">Step 6 · Authentication</div>
       <h1 className="step-title" style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
         How will Databricks authenticate to {conn.label}?
         <StatusBadge status={conn.status} />
