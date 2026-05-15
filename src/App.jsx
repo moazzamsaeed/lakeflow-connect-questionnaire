@@ -463,11 +463,6 @@ const NETWORK_MODELS = {
     icon: "globe",
     desc: "Public connectivity restricted by source-side IP allowlists for Databricks egress IPs.",
   },
-  transit_gateway: {
-    label: "Transit Gateway / Hub-Spoke",
-    icon: "satellite",
-    desc: "Routed through a transit hub or hub-and-spoke topology.",
-  },
   vpn_expressroute: {
     label: "VPN / ExpressRoute / Direct Connect",
     icon: "plug",
@@ -790,12 +785,6 @@ function genNetwork(state, conn) {
       });
     }
     checks.push({ text: `Add all Databricks egress IPs to ${conn.label} firewall / IP allowlist`, priority: "blocker" });
-  }
-
-  // ── Hub-Spoke / Transit Gateway
-  if (net === "transit_gateway") {
-    checks.push({ text: "Verify transit hub routes include Databricks subnet CIDR ranges", priority: "high" });
-    checks.push({ text: "Confirm hub firewall allows traffic on required database ports", priority: "high" });
   }
 
   // ── VPN / ExpressRoute / Direct Connect
@@ -1620,7 +1609,7 @@ function AppHeader({ onHome }) {
       <button className="brand brand-button" onClick={onHome} aria-label="Go to home page">
         <span className="brand-mark"><Icon name="flow" size={26} strokeWidth={1.75} /></span>
         <span className="brand-title">
-          Lakeflow Connect <span className="brand-accent">Questionnaire</span>
+          Lakeflow Connect <span className="brand-accent">Pre-flight Checklist</span>
         </span>
       </button>
       <div className="header-right">
@@ -1654,13 +1643,13 @@ function LandingPage({ onStart }) {
           Plan a production-ready <span className="accent">ingestion rollout</span> in minutes.
         </h1>
         <p className="landing-subtitle">
-          A guided pre-flight questionnaire for Lakeflow Connect. Generates a tailored checklist
+          A guided pre-flight checklist for Lakeflow Connect. Generates a tailored checklist
           across identity, networking, workspace, source-system prep, and security — built from
           your connector, cloud, and topology choices.
         </p>
         <div className="landing-ctas">
           <button className="btn btn-primary btn-lg" onClick={onStart}>
-            Start questionnaire <Icon name="arrowRight" />
+            Start checklist <Icon name="arrowRight" />
           </button>
           <a
             className="btn btn-ghost btn-lg"
@@ -1784,7 +1773,7 @@ function LandingPage({ onStart }) {
               <li><Icon name="check" size={14} strokeWidth={2.5} className="tick" /> Flexible-server parameters</li>
               <li><Icon name="check" size={14} strokeWidth={2.5} className="tick" /> Private Endpoints + Private DNS</li>
               <li><Icon name="check" size={14} strokeWidth={2.5} className="tick" /> Entra ID app registrations</li>
-              <li><Icon name="check" size={14} strokeWidth={2.5} className="tick" /> ExpressRoute / hub-spoke routing</li>
+              <li><Icon name="check" size={14} strokeWidth={2.5} className="tick" /> ExpressRoute / VPN routing</li>
             </ul>
           </div>
           <div className="cloud-card tint-gcp">
@@ -1804,7 +1793,7 @@ function LandingPage({ onStart }) {
         <h3>Ready to plan your Lakeflow Connect rollout?</h3>
         <p>No sign-in. No data leaves your browser. Six steps. About 2 minutes.</p>
         <button className="btn btn-primary btn-lg" onClick={onStart}>
-          Start questionnaire <Icon name="arrowRight" />
+          Start checklist <Icon name="arrowRight" />
         </button>
       </div>
     </div>
@@ -1816,7 +1805,7 @@ function AppFooter() {
     <footer className="app-footer">
       <div className="footer-left">
         <Icon name="flow" size={14} />
-        <span>Lakeflow Connect Questionnaire</span>
+        <span>Lakeflow Connect Pre-flight Checklist</span>
       </div>
       <div className="footer-right">
         <a
@@ -1904,7 +1893,7 @@ export default function App() {
     }
 
     if (loc === "saas") return ["public_with_ip_acl"];
-    if (loc === "on_prem") return ["vpn_expressroute", "transit_gateway", "public_with_ip_acl"];
+    if (loc === "on_prem") return ["vpn_expressroute", "public_with_ip_acl"];
     if (loc === "different_cloud") return ["cross_cloud_vpn", "cross_cloud_interconnect", "public_with_ip_acl"];
     if (loc === "same_cloud") return ["private_link", "vnet_peering", "public_with_ip_acl"];
     return [];
@@ -1956,7 +1945,7 @@ export default function App() {
   }, [state, step]);
 
   // Clicking the brand goes home AND fully resets — same effect as the
-  // "Restart questionnaire" button on results. This avoids the
+  // "Restart checklist" button on results. This avoids the
   // surprise where re-starting from the landing page silently resumed
   // a half-filled form.
   const goHome = () => {
@@ -2631,7 +2620,7 @@ function StepResults({
         <div className="restart-actions">
           <DownloadMenu onMarkdown={downloadMd} onPdf={downloadPdf} />
           <button className="btn btn-primary btn-lg" onClick={onReset}>
-            <Icon name="restart" size={16} /> Restart questionnaire
+            <Icon name="restart" size={16} /> Restart checklist
           </button>
         </div>
       </div>

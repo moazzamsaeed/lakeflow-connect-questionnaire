@@ -23,4 +23,4 @@ git -C "$DIST" -c user.name=deploy -c user.email=deploy@local \
 git -C "$DIST" push -f "$REMOTE" gh-pages
 
 rm -rf "$DIST/.git"
-echo "Published. Site: https://moazzamsaeed.github.io/lakeflow-connect-questionnaire/"
+echo "Published. Site: https://moazzamsaeed.github.io/lakeflow-connect-preflight-checklist/"

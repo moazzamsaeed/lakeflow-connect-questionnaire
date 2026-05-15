@@ -5,7 +5,7 @@ import path from "node:path";
 const stub = path.resolve(__dirname, "src/empty.js");
 
 export default defineConfig({
-  base: "/lakeflow-connect-questionnaire/",
+  base: "/lakeflow-connect-preflight-checklist/",
   plugins: [react()],
   server: { port: 5179, host: true },
   // jsPDF only needs html2canvas + dompurify for its optional doc.html()
