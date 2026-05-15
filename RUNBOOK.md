@@ -11,7 +11,7 @@ Keep this file current when commands, URLs, or architecture change.
 |---|---|
 | Live site | https://moazzamsaeed.github.io/lakeflow-connect-preflight-checklist/ |
 | Source repo | https://github.com/moazzamsaeed/lakeflow-connect-preflight-checklist |
-| Local working tree | `/Users/moazzam.saeed/Documents/projects/lakeflow-connect/lakeflow-connect-questionnaire` |
+| Local working tree | `/Users/moazzam.saeed/Documents/projects/lakeflow-connect/lakeflow-connect-preflight-checklist` |
 | Default branch | `main` |
 | Deploy branch | `gh-pages` (force-pushed by the deploy script) |
 | Pages source | Branch `gh-pages` / path `/` (legacy build type) |
@@ -34,7 +34,7 @@ Keep this file current when commands, URLs, or architecture change.
 ## 3. Local development
 
 ```sh
-cd /Users/moazzam.saeed/Documents/projects/lakeflow-connect/lakeflow-connect-questionnaire
+cd /Users/moazzam.saeed/Documents/projects/lakeflow-connect/lakeflow-connect-preflight-checklist
 npm install        # one-time, or after package.json changes
 npm run dev        # vite dev server on http://localhost:5179/lakeflow-connect-preflight-checklist/
 ```
